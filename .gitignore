@@ -64,5 +64,8 @@ target/
 # Sqlite files
 *.sqlite*
 
-#pycharm
+# pycharm
 .idea/
+
+# Mac Store
+.DS_Store
