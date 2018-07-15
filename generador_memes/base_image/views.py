@@ -1,40 +1,42 @@
 from django.http import JsonResponse
-
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.parsers import JSONParser
 
-
-def fetch_images(request):
-    """
-    Manual implementation of the endpoint
-    :param request:
-    :return: [{"name": "first", "file": "white.png"}, {"name": "second", "file": "one.png"}]
-    """
-    images = [
-        {
-            'name': 'first',
-            'file': 'white.png'
-        }, {
-            'name': 'second',
-            'file': 'one.png'
-        }
-    ]
-    return JsonResponse(images, safe=False)
+from .models import Image
+from base_image.serializers import ImageSerializer
 
 
 @csrf_exempt
-def add_images(request):
-    """
-    Manual implementation of the endpoint
-    :param request:
-    :return:
-    """
-    if request.method != 'POST':
-        return JsonResponse({'message': 'Method not allowed'}, status=403)
+def image_list(request):
+    if request.method == 'GET':
+        images = Image.objects.all()
+        images_serialized = ImageSerializer(images, many=True)
+        return JsonResponse(images_serialized.data, safe=False)
+    if request.method == 'POST':
+        serialized_data = Image(name=request.POST['name'], file=request.FILES['file'])
+        serialized_data.save()
+        return JsonResponse(ImageSerializer(serialized_data).data, status=201)
 
-    image = {
-        'id': 1,
-        'name': request.POST.get('name'),
-        'file': '/static/test_files/{filename}'.format(filename=request.FILES.get('file').name)
-    }
 
-    return JsonResponse(image, safe=False, status=201)
+@csrf_exempt
+def image_detail(request, image_id):
+    try:
+        image = Image.objects.get(pk=image_id)
+    except Image.DoesNotExist:
+            return JsonResponse({'message': 'Image Not Found'}, status=404)
+
+    if request.method == 'GET':
+        image_serialize = ImageSerializer(image)
+        return JsonResponse(image_serialize.data)
+
+    if request.method == 'PUT':
+        update_data = JSONParser().parse(request)
+        data_serialized = ImageSerializer(image, data=update_data)
+        if not data_serialized.is_valid():
+            return JsonResponse(data_serialized.errors, status=400)
+        data_serialized.save()
+        return JsonResponse(data_serialized.data)
+
+    if request.method == 'DELETE':
+        image.delete()
+        return JsonResponse({'message': 'deleted'}, status=204)

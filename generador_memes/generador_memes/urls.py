@@ -20,6 +20,6 @@ import base_image.views as base_image_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/v_0/images/', base_image_views.fetch_images),
-    path('api/v_0/images/create/', base_image_views.add_images)
+    path('api/v1/images/', base_image_views.image_list),
+    path('api/v1/images/<int:image_id>/', base_image_views.image_detail)
 ]
