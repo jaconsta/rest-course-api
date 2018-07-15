@@ -16,6 +16,10 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 
+import base_image.views as base_image_views
+
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('api/v_0/images/', base_image_views.fetch_images),
+    path('api/v_0/images/create/', base_image_views.add_images)
 ]

@@ -69,3 +69,8 @@ target/
 
 # Mac Store
 .DS_Store
+
+
+# Project routes
+generador_memes/uploads/*
+*.ignore*

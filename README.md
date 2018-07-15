@@ -44,7 +44,7 @@ Stop:
 $ docker container stop <container_id/name>
 ```
 
-## Instalation
+## Installation
 
 You require Python 3.5 or greater.
 
