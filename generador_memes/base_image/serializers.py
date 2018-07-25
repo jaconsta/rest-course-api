@@ -3,9 +3,15 @@ from rest_framework import serializers
 from .models import Image
 
 
+class ImageUploadSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=150)
+    file = serializers.ImageField()
+
+
 class ImageSerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(max_length=150)
+    file = serializers.ImageField(read_only=True)
 
     model = Image
 

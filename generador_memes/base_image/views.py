@@ -1,35 +1,53 @@
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from rest_framework import viewsets
+from rest_framework.parsers import JSONParser, MultiPartParser
 
 from .models import Image
-from base_image.serializers import ImageSerializer
+from .forms import ImageUploadForm
+from .serializers import ImageSerializer, ImageUploadSerializer
 
 
-@csrf_exempt
-def image_list(request):
-    if request.method == 'GET':
+class FileUploadView(viewsets.GenericViewSet):
+    parser_classes = (MultiPartParser, )
+    serializer_class = ImageUploadSerializer
+
+    def create(self, request):
+        form = ImageUploadForm(request.POST, request.FILES)
+        if not form.is_valid():
+            return JsonResponse({'error': 'Bad image form'})
+        form.save()
+        response_body = ImageSerializer(form.instance).data
+        return JsonResponse(response_body, status=201)
+
+
+class ImageViewSet(viewsets.GenericViewSet):
+    """
+    The images that will be used as background for the memes.
+
+    list:
+    Return all base images, currently not sorted.
+    """
+    parser_classes = (JSONParser, )
+    serializer_class = ImageSerializer
+
+    def list(self, request):
         images = Image.objects.all()
         images_serialized = ImageSerializer(images, many=True)
         return JsonResponse(images_serialized.data, safe=False)
-    if request.method == 'POST':
-        serialized_data = Image(name=request.POST['name'], file=request.FILES['file'])
-        serialized_data.save()
-        return JsonResponse(ImageSerializer(serialized_data).data, status=201)
 
-
-@csrf_exempt
-def image_detail(request, image_id):
-    try:
-        image = Image.objects.get(pk=image_id)
-    except Image.DoesNotExist:
-            return JsonResponse({'message': 'Image Not Found'}, status=404)
-
-    if request.method == 'GET':
+    def retrieve(self, request, pk=None):
+        try:
+            image = Image.objects.get(pk=pk)
+        except Image.DoesNotExist:
+            return JsonResponse({"error": "Image does not exist."}, status=404)
         image_serialize = ImageSerializer(image)
         return JsonResponse(image_serialize.data)
 
-    if request.method == 'PUT':
+    def update(self, request, pk=None):
+        try:
+            image = Image.objects.get(pk=pk)
+        except Image.DoesNotExist:
+            return JsonResponse({"error": "Image does not exist."}, status=404)
         update_data = JSONParser().parse(request)
         data_serialized = ImageSerializer(image, data=update_data)
         if not data_serialized.is_valid():
@@ -37,6 +55,10 @@ def image_detail(request, image_id):
         data_serialized.save()
         return JsonResponse(data_serialized.data)
 
-    if request.method == 'DELETE':
+    def destroy(self, request, pk=None):
+        try:
+            image = Image.objects.get(pk=pk)
+        except Image.DoesNotExist:
+            return JsonResponse({"error": "Image does not exist."}, status=404)
         image.delete()
         return JsonResponse({'message': 'deleted'}, status=204)

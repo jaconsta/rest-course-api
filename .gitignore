@@ -72,5 +72,5 @@ target/
 
 
 # Project routes
-generador_memes/uploads/*
+generador_memes/static/uploads
 *.ignore*

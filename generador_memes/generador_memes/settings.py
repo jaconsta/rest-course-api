@@ -26,7 +26,7 @@ SECRET_KEY = 'a@sm#$bc6qb@!ohs-nb5=s7t=y%)z(_uy#127m-n+mow%ni%1n'
 DEBUG = True
 
 if DEBUG:
-    ALLOWED_HOSTS= ['*']
+    ALLOWED_HOSTS = ['*']
 else:
     ALLOWED_HOSTS = []
 
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'drf_yasg',
     'base_image',
 ]
 
@@ -122,3 +123,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static")
+]
